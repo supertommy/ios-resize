@@ -1,0 +1,238 @@
+#!/usr/bin/php
+
+<?php
+/*******************************************************************************************************
+* This software, ios-resize, is built by Tommy Leung on top of work by Jonathan Ellis on his blog: 
+* http://jona.than.biz/blog/generating-non-retina-images-automatically-for-ios/. Features not found in
+* original implementation include:
+* 
+*   - cocos2d format support
+*   - recursively directory search
+*   - usage instructions in command line
+*   - comments on how it works (if you care)
+* 
+* ios-resize was developed for the Mac OS X 10.8 operating system since most iOS development happens on a
+* Mac and PHP comes preinstalled on every Mac.
+*
+* USAGE:
+*
+* In the Terminal, run:
+* 
+* ios-resize *
+* This will resize all images in the current folder.
+*
+* ios-resize file@2x.png file2@2x.png
+* This will resize the two images specified.
+*
+* ios-resize * -d
+* This will resize all images in the current directory as well as all children directory recursively.
+* 
+* INSTALLATION
+* 
+* 1. Make sure your path to PHP is located at /usr/bin/php otherwise edit the first line to point to PHP. 
+*    1a. Save the file if you changed the path to PHP.
+* 2. In the Terminal, go to where the ios-resize file is and run:
+*       chmod 777 ios-resize
+* 3. Then copy the file to your /usr/bin directory by running:
+*       cp ./ios-resize /usr/bin/ios-resize
+*    You may get a permission error so instead do:
+*       sudo cp ./ios-resize /usr/bin/ios-resize
+*    And enter your password when prompted. This assumes your user account has proper permissions to write
+*    to the /usr/bin folder.
+* 
+* ALTERNATE INSTALLATION
+*
+* 1. Make sure your path to PHP is located at /usr/bin/php otherwise edit the first line to point to PHP.
+*    1a. Save the file if you changed the path to PHP.
+* 2. And you're done. The only difference is that usage will look like this instead:
+*       php ios-resize * -d
+* 
+* ios-resize is released under the MIT License.
+* 
+* Copyright (C) 2012 Tommy Leung (http://www.supertommy.com)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
+* associated documentation files (the "Software"), to deal in the Software without restriction, 
+* including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+* and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+* subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in all copies or substantial 
+* portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+* LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
+* NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+********************************************************************************************************/
+
+$args = $_SERVER['argv'];
+$numArgs = count($args);
+
+//options
+$lookInDirectories = false;
+
+if($numArgs == 1)   //first arg is always the file name so 1 arg is no args
+{
+    echo "** ios-resize is a command line tool for resizing retina resolution PNG images to non-retina resolutions in Apple's naming convention (@2x) as well as the cocos2d framework convention (-hd, -ipadhd).\n\n";
+    echo "** usage:\n";
+    echo "ios-resize * [options]\n";
+    echo "Resize all images in current directory with @2x, -hd, or -ipadhd in file name\n\n";
+
+    echo "ios-resize file@2x.png file2@2x.png [options]\n";
+    echo "Resize images file@2x.png and file2@2x.png with @2x, -hd, or -ipadhd in file name\n\n";
+
+    echo "** options: -d\n";
+    echo "Recursively search through all children directories and resize those images as well.\n";
+    echo "Example: \"ios-resize * -d\" will resize all images in current directory and children directories recursively.\n";
+    
+    exit();
+}
+else
+{
+    //process options--currently only 1 option...
+    for($i = 1; $i < $numArgs; ++$i)
+    {
+        if(strcmp($args[$i], "-d") == 0)
+        {
+            $lookInDirectories = true;
+        } 
+    }
+}
+
+//wraps is_dir and doesn't allow for . or ..
+function isAcceptableDirectory($dir)
+{
+    if(!isAcceptableFilename($dir))
+        return false;
+
+    return is_dir($dir);
+}
+
+//checks to make sure a filename is not . or ..
+function isAcceptableFilename($filename)
+{
+    if(strcmp($filename, ".") == 0)
+        return false;
+    if(strcmp($filename, "..") == 0)
+        return false;
+
+    return true;
+}
+
+//image resize function; $spacing is for output to terminal
+function resizeImage($filename, $dir=false, $spacing="")
+{
+    //recursively look into directories if $dir is true
+    if($dir && isAcceptableDirectory($filename))
+    {
+        if($handle = opendir($filename))
+        {
+            echo $spacing . "Processing images in " . $filename . " directory . . .\n\n";
+            while(($file = readdir($handle)) !== false)
+            {
+                //make sure the file is acceptable (not . or .. before it's concatenated with the dir path)
+                if(isAcceptableFilename($file))
+                {
+                    resizeImage($filename."/".$file, $dir, ($spacing .= "    "));
+                }
+            }
+            echo $spacing . "Finished processing images in " . $filename . " directory . . .\n\n";
+            closedir($handle);
+        }
+        else
+            echo $spacing . "Failed to open directory: " . $filename . "\n\n";
+    }
+    else if(is_file($filename) && strpos($filename, ".png")) //only resize png files
+    {
+        $appleFormat = false;
+        $cocos2dFormat = false;
+        $cocos2dFormat_ipad = false;
+        
+        $appleFormat = strrpos($filename, "@2x", -1);
+        //check that the @2x is at the end of the file name (7 spaces from the end of the string: xxxx[@2x.png])
+        if($appleFormat && $appleFormat < strlen($filename) - 7)
+            echo $spacing . "Warning: @2x suffix was discovered in unexpected location. Unexpected results may occur.\n";
+
+        if(!$appleFormat)   //@2x not found so let's try -hd
+        {
+            $cocos2dFormat = strrpos($filename, "-hd", -1);
+            if($cocos2dFormat && $cocos2dFormat < strlen($filename) - 7)
+                echo $spacing . "Warning: -hd suffix was discovered in unexpected location. Unexpected results may occur.\n";    
+        }
+        
+        if(!$appleFormat && !$cocos2dFormat)    //@2x and -hd not found so let's try -ipadhd
+        {
+            $cocos2dFormat_ipad = strrpos($filename, "-ipadhd", -1);
+            if($cocos2dFormat_ipad && $cocos2dFormat_ipad < strlen($filename) - 11)
+                echo $spacing . "Warning: -ipadhd suffix was discovered in unexpected location. Unexpected results may occur.\n";        
+        }
+
+        if ($appleFormat || $cocos2dFormat || $cocos2dFormat_ipad) 
+        {
+            echo $spacing . "Processing image " . $filename . " . . .\n";
+            if($appleFormat)
+                echo $spacing . "Image uses Apple convention: @2x\n";
+            else if($cocos2dFormat)
+                echo $spacing . "Image uses cocos2d convention: -hd\n";
+            else if($cocos2dFormat_ipad)
+                echo $spacing . "Image uses cocos2d-iPad convention: -ipadhd\n";
+
+            //make a png image resource from the current one
+            $image = imagecreatefrompng($filename);
+     
+            //get the size of the image
+            $width = imagesx($image);
+            $height = imagesy($image);
+            
+            //calculate the new width and height for non-retina images (50% smaller)
+            $newWidth = $width/2.0;
+            $newHeight = $height/2.0;
+            
+            //create a new image with the newly calculated width and height
+            $newImage = imagecreatetruecolor($newWidth, $newHeight);
+     
+            imagealphablending($newImage, false);  //set imagealphablending to false so that imagesavesalpha will work
+            if(!imagesavealpha($newImage, true))   //attempt to save full alpha channel information
+                echo $spacing . "Error: Failed to save full alpha channel information for " . $filename . ". Unexpected results may occur.\n";
+
+            //allocate a completely transparent color; params for RGB don't make a difference, A is set to full transparency at 127
+            $newImageColor = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
+
+            //make a transparent color with allocated color above
+            $color = imagecolortransparent($newImage, $newImageColor);
+
+            //fill the new image with color defined above at 0, 0 (top left)
+            imagefill($newImage, 0, 0, $color);
+            
+            //copy the source image into the new image at new width and height with smooth interpolation
+            if(!imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height))
+                echo $spacing . "Error: Failed to properly resample " . $filename . ". Unexpected results may occur.\n";
+
+            //create the appropriate new filename for non-retina image
+            if($appleFormat)
+                $newFilename = str_replace("@2x", "", $filename);
+            else if($cocos2dFormat)
+                $newFilename = str_replace("-hd", "", $filename);
+            else if($cocos2dFormat_ipad)
+                $newFilename = str_replace("-ipadhd", "-ipad", $filename);
+
+            //create the new png image and save it in the same directory as the original
+            imagepng($newImage, $newFilename);
+
+            echo $spacing . "Finished processing " . $filename . "\n\n";
+        }
+    }
+}
+
+//start here
+for ($i = 1; $i < $numArgs; $i++) 
+{ 
+    $filename = $args[$i];
+    resizeImage($filename, $lookInDirectories);
+}
+
+echo "ios-resize finished.\n";
+ 
+?>
