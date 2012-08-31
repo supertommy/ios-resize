@@ -47,8 +47,6 @@ Make sure your path to PHP is located at /usr/bin/php otherwise edit the first l
 
 `php ios-resize * -d`
 
-ios-resize is released under the MIT License.
-
 ### Authors and Contributors
 ios-resize is built by Tommy Leung on top of work by Jonathan Ellis on his [blog](http://jona.than.biz/blog/generating-non-retina-images-automatically-for-ios/). Features not found in original implementation include:
 
@@ -61,3 +59,6 @@ I do not personally know Jonathan Ellis, I just found his code on Google and tho
 
 ### Support or Contact
 There's really no support but you tweet me [@iamsupertommy](http://twitter.com/iamsupertommy) or find me on Github @supertommy and I'll see if I can help you.
+
+### License
+ios-resize is released under the MIT License.
