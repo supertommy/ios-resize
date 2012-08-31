@@ -133,12 +133,13 @@ function resizeImage($filename, $dir=false, $spacing="")
         if($handle = opendir($filename))
         {
             echo $spacing . "Processing images in " . $filename . " directory . . .\n\n";
+            $spacing .= "    ";
             while(($file = readdir($handle)) !== false)
             {
                 //make sure the file is acceptable (not . or .. before it's concatenated with the dir path)
                 if(isAcceptableFilename($file))
                 {
-                    resizeImage($filename."/".$file, $dir, ($spacing .= "    "));
+                    resizeImage($filename."/".$file, $dir, $spacing);
                 }
             }
             echo $spacing . "Finished processing images in " . $filename . " directory . . .\n\n";
