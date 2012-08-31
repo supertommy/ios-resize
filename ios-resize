@@ -113,10 +113,13 @@ function isAcceptableDirectory($dir)
 //checks to make sure a filename is not . or ..
 function isAcceptableFilename($filename)
 {
-    if(strcmp($filename, ".") == 0)
-        return false;
-    if(strcmp($filename, "..") == 0)
-        return false;
+    $ignoreList = array(".", "..", ".git", ".svn");
+
+    for($i = 0; $i < count($ignoreList); ++$i)
+    {
+        if(strcmp($ignoreList[$i], $filename) == 0)
+            return false;
+    }
 
     return true;
 }
