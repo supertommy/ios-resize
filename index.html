@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="ios-resize : PHP shell script for Mac OS X to resize PNG images with retina resolutions to non-retina resolutions for use in iOS and Mac OS X apps." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>ios-resize</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/supertommy/ios-resize">View on GitHub</a>
+
+          <h1 id="project_title">ios-resize</h1>
+          <h2 id="project_tagline">PHP shell script for Mac OS X to resize PNG images with retina resolutions to non-retina resolutions for use in iOS and Mac OS X apps.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/supertommy/ios-resize/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/supertommy/ios-resize/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>ios-resize</h3>
+
+<p>ios-resize a command line tool used to automatically resize PNG images from retina resolutions to non-retina resolutions. Saving out two versions of the same image in PhotoShop is an annoying chore that makes developers less productive so a computer should do it instead!</p>
+
+<p>ios-resize will work for PNG files using Apple's naming convention (@2x) as well as the cocos2d framework naming conventions (-hd and -ipadhd). ios-resize defaults to resizing PNG files in a single directory but can be flagged to recursively look through all children directories as well. Please refer to the Usage and Installation sections for more information.</p>
+
+<p>Image resizing is done using PHP's image processing library.</p>
+
+<p>ios-resize was developed for the Mac OS X 10.8 operating system since most iOS development happens on a Mac and PHP comes preinstalled on every Mac.</p>
+
+<h3>Usage:</h3>
+
+<p>In the Terminal, run:</p>
+
+<p><code>ios-resize *</code></p>
+
+<p>This will resize all images in the current folder.</p>
+
+<p><code>ios-resize file@2x.png file2@2x.png</code></p>
+
+<p>This will resize the two images specified.</p>
+
+<p><code>ios-resize * -d</code></p>
+
+<p>This will resize all images in the current directory as well as all children directory recursively.</p>
+
+<h3>Installation</h3>
+
+<p>Make sure your path to PHP is located at /usr/bin/php otherwise edit the first line to point to PHP. Save the file if you changed the path to PHP.</p>
+
+<p>In the Terminal, go to where the ios-resize file is and run:</p>
+
+<p><code>chmod 777 ios-resize</code></p>
+
+<p>Then copy the file to your /usr/bin directory by running:</p>
+
+<p><code>cp ./ios-resize /usr/bin/ios-resize</code></p>
+
+<p>You may get a permission error so instead do:</p>
+
+<p><code>sudo cp ./ios-resize /usr/bin/ios-resize</code></p>
+
+<p>And enter your password when prompted. This assumes your user account has proper permissions to write to the /usr/bin folder.</p>
+
+<h3>Alternate Installation</h3>
+
+<p>Make sure your path to PHP is located at /usr/bin/php otherwise edit the first line to point to PHP. Save the file if you changed the path to PHP. And you're done. The only difference is that usage will look like this instead:</p>
+
+<p><code>php ios-resize * -d</code></p>
+
+<p>ios-resize is released under the MIT License.</p>
+
+<h3>Authors and Contributors</h3>
+
+<p>ios-resize is built by Tommy Leung on top of work by Jonathan Ellis on his <a href="http://jona.than.biz/blog/generating-non-retina-images-automatically-for-ios/">blog</a>. Features not found in original implementation include:</p>
+
+<ul>
+<li>cocos2d format support</li>
+<li>recursively directory search</li>
+<li>usage instructions in command line</li>
+<li>comments on how it works (if you care)</li>
+</ul><p>I do not personally know Jonathan Ellis, I just found his code on Google and thought it was quite useful so I extended it.</p>
+
+<h3>Support or Contact</h3>
+
+<p>There's really no support but you tweet me <a href="http://twitter.com/iamsupertommy">@iamsupertommy</a> or find me on Github <a href="https://github.com/supertommy" class="user-mention">@supertommy</a> and I'll see if I can help you.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">ios-resize maintained by <a href="https://github.com/supertommy">supertommy</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
