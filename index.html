@@ -33,7 +33,7 @@
       <section id="main_content" class="inner">
         <h3>ios-resize</h3>
 
-<p>ios-resize a command line tool used to automatically resize PNG images from retina resolutions to non-retina resolutions. Saving out two versions of the same image in PhotoShop is an annoying chore that makes developers less productive so a computer should do it instead!</p>
+<p>ios-resize a command line tool used to automatically resize PNG images from retina resolutions to non-retina resolutions. Saving out two versions of the same image in PhotoShop is an annoying chore that makes developers less productive so a computer should do it instead! ios-resize can also automatically create all icon files needed for every iOS app from a source file.</p>
 
 <p>ios-resize will work for PNG files using Apple's naming convention (@2x) as well as the cocos2d framework naming conventions (-hd and -ipadhd). ios-resize defaults to resizing PNG files in a single directory but can be flagged to recursively look through all children directories as well. Please refer to the Usage and Installation sections for more information.</p>
 
@@ -55,7 +55,13 @@
 
 <p><code>ios-resize * -d</code></p>
 
-<p>This will resize all images in the current directory as well as all children directory recursively.</p>
+<p>This will resize all images in the current directory as well as all children directory recursively. Using the -d option will always result in all acceptable PNG files in children directories being resized.</p>
+
+<h4>Make Icons:</h4>
+
+<p><code>ios-resize [src file] - icon</code></p>
+
+<p>ios-resize can also automatically create the necessary iOS icons out of a source image. The source image should be square and at least as big as the largest icon size (114 x 114). </p>
 
 <h3>Installation</h3>
 
@@ -79,7 +85,7 @@
 
 <p>Make sure your path to PHP is located at /usr/bin/php otherwise edit the first line to point to PHP. Save the file if you changed the path to PHP. And you're done. The only difference is that usage will look like this instead:</p>
 
-<p><code>php ios-resize * -d</code></p>
+<p><code>php ios-resize file@2x.png</code></p>
 
 <h3>Authors and Contributors</h3>
 
@@ -88,6 +94,7 @@
 <ul>
 <li>cocos2d format support</li>
 <li>recursively directory search</li>
+<li>make iOS icons</li>
 <li>usage instructions in command line</li>
 <li>comments on how it works (if you care)</li>
 </ul><p>I do not personally know Jonathan Ellis, I just found his code on Google and thought it was quite useful so I extended it.</p>
