@@ -8,6 +8,7 @@
 * 
 *   - cocos2d format support
 *   - recursively directory search
+*   - make iOS icons
 *   - usage instructions in command line
 *   - comments on how it works (if you care)
 * 
@@ -26,6 +27,10 @@
 *
 * ios-resize * -d
 * This will resize all images in the current directory as well as all children directory recursively.
+*
+* ios-resize -icon icon_file.png
+* This will take the file "icon_file.png" and make the appropriate icon files required by iOS. Make sure the
+* source image ("icon_file.png") has square dimensions for best results.
 * 
 * INSTALLATION
 * 
@@ -72,6 +77,7 @@ $numArgs = count($args);
 
 //options
 $lookInDirectories = false;
+$makeIcons = false;
 
 if($numArgs == 1)   //first arg is always the file name so 1 arg is no args
 {
@@ -83,21 +89,34 @@ if($numArgs == 1)   //first arg is always the file name so 1 arg is no args
     echo "ios-resize file@2x.png file2@2x.png [options]\n";
     echo "Resize images file@2x.png and file2@2x.png with @2x, -hd, or -ipadhd in file name\n\n";
 
-    echo "** options: -d\n";
+    echo "** options:\n";
+    echo "-d\n";
     echo "Recursively search through all children directories and resize those images as well.\n";
-    echo "Example: \"ios-resize * -d\" will resize all images in current directory and children directories recursively.\n";
+    echo "Example: \"ios-resize * -d\" will resize all images in current directory and children directories recursively.\n\n";
     
+    echo "[src file] -icon\n";
+    echo "This will take the file [src file] and make the appropriate icon files required by iOS. Make sure the source image has square dimensions for best results.\n";
+    echo "Example: \"ios-resize icon_file.png -icon\"\n\n";
+
     exit();
 }
 else
 {
-    //process options--currently only 1 option...
+    //process options--currently only recursive directory search and make icons
     for($i = 1; $i < $numArgs; ++$i)
     {
         if(strcmp($args[$i], "-d") == 0)
         {
             $lookInDirectories = true;
-        } 
+            break;
+        }
+        else if(strcmp($args[$i], "-icon") == 0)
+        {
+            $makeIcons = true;
+            if($numArgs != 3)
+                echo "Error: Incorrect number of arguments for making icons. Please specify one image file.\n";
+            break;
+        }
     }
 }
 
@@ -122,6 +141,46 @@ function isAcceptableFilename($filename)
     }
 
     return true;
+}
+
+function makeCopyOfImageWithNewDimensions($filename, $newFilename, $newWidth=-1, $newHeight=-1)
+{
+    //make a png image resource from the current one
+    $image = imagecreatefrompng($filename);
+
+    //get the size of the image
+    $width = imagesx($image);
+    $height = imagesy($image);
+    
+    //auto calculate the new width and height and assume retina resize if newWidth or newHeight is -1
+    if($newWidth == -1 || $newHeight == -1)
+    {
+        $newWidth = $width/2.0;
+        $newHeight = $height/2.0;
+    }
+    
+    //create a new image with the newly calculated width and height
+    $newImage = imagecreatetruecolor($newWidth, $newHeight);
+
+    imagealphablending($newImage, false);  //set imagealphablending to false so that imagesavesalpha will work
+    if(!imagesavealpha($newImage, true))   //attempt to save full alpha channel information
+        echo $spacing . "Error: Failed to save full alpha channel information for " . $filename . ". Unexpected results may occur.\n";
+
+    //allocate a completely transparent color; params for RGB don't make a difference, A is set to full transparency at 127
+    $newImageColor = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
+
+    //make a transparent color with allocated color above
+    $color = imagecolortransparent($newImage, $newImageColor);
+
+    //fill the new image with color defined above at 0, 0 (top left)
+    imagefill($newImage, 0, 0, $color);
+    
+    //copy the source image into the new image at new width and height with smooth interpolation
+    if(!imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height))
+        echo $spacing . "Error: Failed to properly resample " . $filename . ". Unexpected results may occur.\n";
+
+    //create the new png image and save it in the same directory as the original
+    imagepng($newImage, $newFilename);
 }
 
 //image resize function; $spacing is for output to terminal
@@ -183,37 +242,6 @@ function resizeImage($filename, $dir=false, $spacing="")
             else if($cocos2dFormat_ipad)
                 echo $spacing . "Image uses cocos2d-iPad convention: -ipadhd\n";
 
-            //make a png image resource from the current one
-            $image = imagecreatefrompng($filename);
-     
-            //get the size of the image
-            $width = imagesx($image);
-            $height = imagesy($image);
-            
-            //calculate the new width and height for non-retina images (50% smaller)
-            $newWidth = $width/2.0;
-            $newHeight = $height/2.0;
-            
-            //create a new image with the newly calculated width and height
-            $newImage = imagecreatetruecolor($newWidth, $newHeight);
-     
-            imagealphablending($newImage, false);  //set imagealphablending to false so that imagesavesalpha will work
-            if(!imagesavealpha($newImage, true))   //attempt to save full alpha channel information
-                echo $spacing . "Error: Failed to save full alpha channel information for " . $filename . ". Unexpected results may occur.\n";
-
-            //allocate a completely transparent color; params for RGB don't make a difference, A is set to full transparency at 127
-            $newImageColor = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
-
-            //make a transparent color with allocated color above
-            $color = imagecolortransparent($newImage, $newImageColor);
-
-            //fill the new image with color defined above at 0, 0 (top left)
-            imagefill($newImage, 0, 0, $color);
-            
-            //copy the source image into the new image at new width and height with smooth interpolation
-            if(!imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height))
-                echo $spacing . "Error: Failed to properly resample " . $filename . ". Unexpected results may occur.\n";
-
             //create the appropriate new filename for non-retina image
             if($appleFormat)
                 $newFilename = str_replace("@2x", "", $filename);
@@ -222,8 +250,7 @@ function resizeImage($filename, $dir=false, $spacing="")
             else if($cocos2dFormat_ipad)
                 $newFilename = str_replace("-ipadhd", "-ipad", $filename);
 
-            //create the new png image and save it in the same directory as the original
-            imagepng($newImage, $newFilename);
+            makeCopyOfImageWithNewDimensions($filename, $newFilename);
 
             echo $spacing . "Finished processing " . $filename . "\n\n";
         }
@@ -231,11 +258,41 @@ function resizeImage($filename, $dir=false, $spacing="")
 }
 
 //start here
-for ($i = 1; $i < $numArgs; $i++) 
-{ 
-    $filename = $args[$i];
-    resizeImage($filename, $lookInDirectories);
+if($makeIcons)
+{
+    $icons = array();
+
+    //add icons to 2D array where each index holds an array with index 0, 1, 2 as name, width, height
+    array_push($icons, array("Icon@2x.png", 114, 114));
+    array_push($icons, array("Icon-72.png", 72, 72));
+    array_push($icons, array("Icon-Small@2x.png", 58, 58));
+    array_push($icons, array("Icon.png", 57, 57));
+    array_push($icons, array("Icon-Small-50.png", 50, 50));
+    array_push($icons, array("Icon-Small.png", 29, 29));
+
+    for($i = 1; $i < $numArgs; ++$i)
+    {
+        $filename = $args[$i];
+        if(isAcceptableFilename($filename) && strcmp($filename, "-icon") != 0)
+        {
+            //make the icons
+            for($j = 0; $j < count($icons); ++$j)
+            {
+                $icon = $icons[$j];
+                makeCopyOfImageWithNewDimensions($filename, $icon[0], $icon[1], $icon[2]);
+            }
+        }
+    }
 }
+else
+{
+    for ($i = 1; $i < $numArgs; $i++) 
+    { 
+        $filename = $args[$i];
+        resizeImage($filename, $lookInDirectories);
+    }    
+}
+
 
 echo "ios-resize finished.\n";
  

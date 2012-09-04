@@ -1,5 +1,5 @@
 ### ios-resize
-ios-resize a command line tool used to automatically resize PNG images from retina resolutions to non-retina resolutions. Saving out two versions of the same image in PhotoShop is an annoying chore that makes developers less productive so a computer should do it instead!
+ios-resize a command line tool used to automatically resize PNG images from retina resolutions to non-retina resolutions. Saving out two versions of the same image in PhotoShop is an annoying chore that makes developers less productive so a computer should do it instead! ios-resize can also automatically create all icon files needed for every iOS app from a source file.
 
 ios-resize will work for PNG files using Apple's naming convention (@2x) as well as the cocos2d framework naming conventions (-hd and -ipadhd). ios-resize defaults to resizing PNG files in a single directory but can be flagged to recursively look through all children directories as well. Please refer to the Usage and Installation sections for more information.
 
@@ -21,7 +21,13 @@ This will resize the two images specified.
 
 `ios-resize * -d`
 
-This will resize all images in the current directory as well as all children directory recursively.
+This will resize all images in the current directory as well as all children directory recursively. Using the -d option will always result in all acceptable PNG files in children directories being resized.
+
+# Make Icons:
+
+`ios-resize [src file] - icon`
+
+ios-resize can also automatically create the necessary iOS icons out of a source image. The source image should be square and at least as big as the largest icon size (114 x 114). 
  
 ### Installation
  
@@ -45,13 +51,14 @@ And enter your password when prompted. This assumes your user account has proper
 
 Make sure your path to PHP is located at /usr/bin/php otherwise edit the first line to point to PHP. Save the file if you changed the path to PHP. And you're done. The only difference is that usage will look like this instead:
 
-`php ios-resize * -d`
+`php ios-resize file@2x.png`
 
 ### Authors and Contributors
 ios-resize is built by Tommy Leung on top of work by Jonathan Ellis on his [blog](http://jona.than.biz/blog/generating-non-retina-images-automatically-for-ios/). Features not found in original implementation include:
 
 * cocos2d format support
 * recursively directory search
+* make iOS icons
 * usage instructions in command line
 * comments on how it works (if you care)
 
