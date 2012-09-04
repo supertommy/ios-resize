@@ -23,7 +23,7 @@ This will resize the two images specified.
 
 This will resize all images in the current directory as well as all children directory recursively. Using the -d option will always result in all acceptable PNG files in children directories being resized.
 
-# Make Icons:
+#### Make Icons:
 
 `ios-resize [src file] - icon`
 
