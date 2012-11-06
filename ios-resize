@@ -263,6 +263,7 @@ if($makeIcons)
     $icons = array();
 
     //add icons to 2D array where each index holds an array with index 0, 1, 2 as name, width, height
+    array_push($icons, array("Icon-144.png", 144, 144));
     array_push($icons, array("Icon@2x.png", 114, 114));
     array_push($icons, array("Icon-72.png", 72, 72));
     array_push($icons, array("Icon-Small@2x.png", 58, 58));
