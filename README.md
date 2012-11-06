@@ -27,7 +27,7 @@ This will resize all images in the current directory as well as all children dir
 
 `ios-resize [src file] - icon`
 
-ios-resize can also automatically create the necessary iOS icons out of a source image. The source image should be square and at least as big as the largest icon size (114 x 114). 
+ios-resize can also automatically create the necessary iOS icons out of a source image. The source image should be square and at least as big as the largest icon size (144 x 144). 
  
 ### Installation
  
